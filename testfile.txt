@@ -1,0 +1,43 @@
+import time
+import multiprocessing
+
+def cpu_bound_task(n):
+    """A CPU-bound task that computes the sum of squares."""
+    total = 0
+    for i in range(n):
+        total += i * i
+    return total
+
+def sequential_execution(num_iterations):
+    """Executes the CPU-bound task sequentially."""
+    start_time = time.time()
+    for _ in range(num_iterations):
+        cpu_bound_task(10000)  # Adjust the parameter based on task complexity
+    end_time = time.time()
+    return end_time - start_time
+
+def parallel_execution(num_iterations, num_processes):
+    """Executes the CPU-bound task using multiprocessing."""
+    start_time = time.time()
+    processes = []
+    for _ in range(num_iterations):
+        process = multiprocessing.Process(target=cpu_bound_task, args=(10000,))
+        processes.append(process)
+        process.start()
+
+    for process in processes:
+        process.join()
+    end_time = time.time()
+    return end_time - start_time
+
+if __name__ == "__main__":
+    num_iterations = 4  # Number of times to execute the CPU-bound task
+    num_processes = 4   # Number of processes to spawn in multiprocessing
+
+    # Measure time taken for sequential execution
+    sequential_time = sequential_execution(num_iterations)
+    print(f"Sequential Execution Time: {sequential_time} seconds")
+
+    # Measure time taken for parallel execution
+    parallel_time = parallel_execution(num_iterations, num_processes)
+    print(f"Parallel Execution Time: {parallel_time} seconds")
