@@ -1,48 +1,32 @@
-import time
-import multiprocessing
+from google.cloud import bigquery
 
-def cpu_bound_task(start, end):
-    """A CPU-bound task that computes the sum of squares."""
-    total = 0
-    for i in range(start, end):
-        total += i * i
-    return total
+# Construct a BigQuery client object.
+client = bigquery.Client()
 
-def parallel_execution(num_iterations):
-    """Executes the CPU-bound task using multiprocessing.Pool."""
-    start_time = time.time()
-    num_processes = multiprocessing.cpu_count()
-    pool = multiprocessing.Pool(processes=num_processes)
-    chunk_size = num_iterations // num_processes
+# Set your variables here
+bucket_name = 'your-bucket-name'
+project_name = 'your-project-id'
+dataset_name = 'your-dataset'
+table_name = 'your-table'
+source_file_name = 'path/to/your-file.csv'  # path within the bucket
+uri = f"gs://{bucket_name}/{source_file_name}"
 
-    results = []
-    for i in range(num_processes):
-        start = i * chunk_size
-        end = min(start + chunk_size, num_iterations)
-        results.append(pool.apply_async(cpu_bound_task, args=(start, end)))
+# Set table_id to the ID of the table to create.
+table_id = f"{project_name}.{dataset_name}.{table_name}"
 
-    pool.close()
-    pool.join()
+job_config = bigquery.LoadJobConfig(
+    source_format=bigquery.SourceFormat.CSV,
+    skip_leading_rows=1,  # Adjust this depending on whether your CSV has a header row
+    autodetect=True,  # Automatically infer the schema (field names and types)
+)
 
-    total_result = sum(result.get() for result in results)
-    end_time = time.time()
-    return end_time - start_time
+load_job = client.load_table_from_uri(
+    uri, table_id, job_config=job_config
+)  # Make an API request.
 
-def sequential_execution(num_iterations):
-    """Executes the CPU-bound task sequentially."""
-    start_time = time.time()
-    for _ in range(num_iterations):
-        cpu_bound_task(0, 10000)  # Adjust the parameter based on task complexity
-    end_time = time.time()
-    return end_time - start_time
+load_job.result()  # Waits for the job to complete.
 
-if __name__ == "__main__":
-    num_iterations = 1000  # Number of iterations of the CPU-bound task
-
-    # Measure time taken for sequential execution
-    sequential_time = sequential_execution(num_iterations)
-    print(f"Sequential Execution Time: {sequential_time} seconds")
-
-    # Measure time taken for parallel execution
-    parallel_time = parallel_execution(num_iterations)
-    print(f"Parallel Execution Time: {parallel_time} seconds")
+table = client.get_table(table_id)  # Make an API request.
+print(
+    f"Loaded {table.num_rows} rows and {len(table.schema)} columns to {table_id}"
+)
