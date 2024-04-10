@@ -1,32 +1,11 @@
-from google.cloud import bigquery
-
-# Construct a BigQuery client object.
-client = bigquery.Client()
-
-# Set your variables here
-bucket_name = 'your-bucket-name'
-project_name = 'your-project-id'
-dataset_name = 'your-dataset'
-table_name = 'your-table'
-source_file_name = 'path/to/your-file.csv'  # path within the bucket
-uri = f"gs://{bucket_name}/{source_file_name}"
-
-# Set table_id to the ID of the table to create.
-table_id = f"{project_name}.{dataset_name}.{table_name}"
-
-job_config = bigquery.LoadJobConfig(
-    source_format=bigquery.SourceFormat.CSV,
-    skip_leading_rows=1,  # Adjust this depending on whether your CSV has a header row
-    autodetect=True,  # Automatically infer the schema (field names and types)
-)
-
-load_job = client.load_table_from_uri(
-    uri, table_id, job_config=job_config
-)  # Make an API request.
-
-load_job.result()  # Waits for the job to complete.
-
-table = client.get_table(table_id)  # Make an API request.
-print(
-    f"Loaded {table.num_rows} rows and {len(table.schema)} columns to {table_id}"
-)
+7861-e69a130CC
+CAF6-8cf4B8D4A
+SAE2-31584DA79
+5910-39982E5BA
+01FA-ba01C9399
+7F18-86e50E00F
+FO7F-722c876B9
+4425-64bd53A89
+1CEB-30403BFF0
+F770-723f6F788
+9F95-ed9eE9514
