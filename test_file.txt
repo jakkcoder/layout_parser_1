@@ -1,0 +1,4 @@
+resource.type="bigquery_resource"
+protoPayload.methodName="google.cloud.bigquery.v2.TableService.InsertTable"
+protoPayload.serviceData.tableInsertRequest.resource.tableId="your_table_id"
+protoPayload.serviceData.tableInsertRequest.resource.datasetId="your_dataset_id"
