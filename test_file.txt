@@ -1,4 +1,32 @@
-resource.type="bigquery_resource"
-protoPayload.methodName="google.cloud.bigquery.v2.TableService.InsertTable"
-protoPayload.serviceData.tableInsertRequest.resource.tableId="your_table_id"
-protoPayload.serviceData.tableInsertRequest.resource.datasetId="your_dataset_id"
+import pandas as pd
+from google.cloud import bigquery
+
+# Connect to BigQuery
+client = bigquery.Client()
+
+# Get the audit log for the past 30 days
+dataset = client.dataset('audit_logs')
+table = dataset.table('data_access')
+query = f"""
+SELECT
+  timestamp,
+  operation,
+  resource_type,
+  resource_name
+FROM
+  `{table.project}.{table.dataset_id}.{table.table_id}`
+WHERE
+  operation = 'jobservice.jobcompleted'
+  AND methodName = 'QUERY'
+  AND timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
+"""
+df = client.query(query).to_dataframe()
+
+# Filter for consumption-based access
+df_filtered = df[df['resource_type'] == 'TABLE']
+
+# Get the last consumption-based access date for each table
+last_consumption_date_per_table = df_filtered.groupby('resource_name')['timestamp'].max()
+
+# Print the results
+print(last_consumption_date_per_table)
