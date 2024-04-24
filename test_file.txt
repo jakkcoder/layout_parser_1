@@ -13,4 +13,20 @@ WHERE
   AND creation_time BETWEEN TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY)
   AND CURRENT_TIMESTAMP()
 ORDER BY
-  total_slot_ms DESC
+  total_slot_ms DESC;
+
+SELECT
+  job_id,
+  user_email,
+  ROUND(total_bytes_processed / POW(1024, 4), 2) AS total_terabytes_processed,
+  FORMAT("%.2f", total_bytes_processed / POW(1024, 4) * 5) AS estimated_cost_usd,
+  state,
+  query
+FROM
+  `region-us`.INFORMATION_SCHEMA.JOBS_BY_PROJECT
+WHERE
+  project_id = 'your-project-id'
+  AND creation_time BETWEEN TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY)
+  AND CURRENT_TIMESTAMP()
+ORDER BY
+  total_bytes_processed DESC;
