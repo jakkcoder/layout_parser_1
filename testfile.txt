@@ -1,1 +1,50 @@
-gha
+from airflow import DAG
+from datetime import datetime, timedelta
+from airflow.operators.python_operator import PythonOperator
+from google.cloud import bigquery
+
+default_args = {
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'start_date': datetime(2023, 1, 1),
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
+}
+
+dag = DAG('bigquery_slot_monitoring',
+          default_args=default_args,
+          description='Monitor and manage BigQuery slots',
+          schedule_interval=timedelta(days=1),
+          catchup=False)
+
+def check_slot_usage():
+    client = bigquery.Client()
+    query = """
+    SELECT slot_ms
+    FROM `region-us`.INFORMATION_SCHEMA.JOBS_BY_PROJECT
+    WHERE creation_time >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 HOUR)
+    """
+    results = client.query(query).result()
+    total_slots_used = sum(row.slot_ms for row in results)
+    return total_slots_used
+
+def make_decision(**context):
+    usage = context['task_instance'].xcom_pull(task_ids='check_slot_usage')
+    # Define your logic here based on usage
+    print("Slot usage checked:", usage)
+
+with dag:
+    check_usage = PythonOperator(
+        task_id='check_slot_usage',
+        python_callable=check_slot_usage
+    )
+
+    decision_task = PythonOperator(
+        task_id='make_decision',
+        python_callable=make_decision,
+        provide_context=True
+    )
+
+    check_usage >> decision_task
