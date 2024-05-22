@@ -1,59 +1,21 @@
-{
-  "views": [
-    {
-      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
-      "project_id": "hsbc-10594356-ihubukpre-prod",
-      "table_id": "EXTNL_ID"
-    },
-    {
-      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
-      "project_id": "hsbc-10594356-ihubukpre-prod",
-      "table_id": "FIN_PLAN_ARR"
-    },
-    {
-      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
-      "project_id": "hsbc-10594356-ihubukpre-prod",
-      "table_id": "FIN_PLAN_LEAD_DTL"
-    },
-    {
-      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
-      "project_id": "hsbc-10594356-ihubukpre-prod",
-      "table_id": "FIN_GOAL"
-    },
-    {
-      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
-      "project_id": "hsbc-10594356-ihubukpre-prod",
-      "table_id": "FIN_GOAL_PROD_ASET_ALLOC"
-    },
-    {
-      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
-      "project_id": "hsbc-10594356-ihubukpre-prod",
-      "table_id": "FIN_PLAN_WRAP_ACCT"
-    },
-    {
-      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
-      "project_id": "hsbc-10594356-ihubukpre-prod",
-      "table_id": "FIN_PLAN_RPT"
-    },
-    {
-      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
-      "project_id": "hsbc-10594356-ihubukpre-prod",
-      "table_id": "FIN_GOAL_RPT_REL"
-    },
-    {
-      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
-      "project_id": "hsbc-10594356-ihubukpre-prod",
-      "table_id": "FIN_PLAN_ORD_PLAC"
-    },
-    {
-      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
-      "project_id": "hsbc-10594356-ihubukpre-prod",
-      "table_id": "FIN_PLAN_ORD_PLAC_ADDL_ITEM"
-    },
-    {
-      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
-      "project_id": "hsbc-10594356-ihubukpre-prod",
-      "table_id": "FIN_PLAN_LEAD_DTL_ADDL_ITEM"
-    }
-  ]
-}
+from pyspark.sql import SparkSession
+
+# Initialize a Spark session
+spark = SparkSession.builder \
+    .appName('Spark BigQuery Example') \
+    .config('spark.jars.packages', 'com.google.cloud.spark:spark-bigquery-with-dependencies_2.12:0.27.0') \
+    .getOrCreate()
+
+# Set GCP credentials
+spark.conf.set("parentProject", "your_project_id")
+spark.conf.set("credentialsFile", "/path/to/your/credentials.json")
+
+# Read from BigQuery
+df = spark.read.format('bigquery') \
+    .option('project', 'your_project_id') \
+    .option('dataset', 'your_dataset_id') \
+    .option('table', 'your_table_id') \
+    .load()
+
+# Show the DataFrame
+df.show()
