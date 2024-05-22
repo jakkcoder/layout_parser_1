@@ -1,66 +1,59 @@
-gcloud auth login
-gcloud auth application-default login
-
-gcloud services enable secretmanager.googleapis.com
-
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/service-account-file.json"
-
-
-from google.cloud import secretmanager
-
-def access_secret_version(project_id, secret_id, version_id="latest"):
-    """
-    Access the payload for the given secret version if one exists.
-    """
-    # Create the Secret Manager client.
-    client = secretmanager.SecretManagerServiceClient()
-
-    # Build the resource name of the secret version.
-    name = f"projects/{project_id}/secrets/{secret_id}/versions/{version_id}"
-
-    # Access the secret version.
-    response = client.access_secret_version(name=name)
-
-    # Print the secret payload.
-    payload = response.payload.data.decode("UTF-8")
-    return payload
-
-# Replace these variables with your own values
-project_id = "your-gcp-project-id"
-secret_id = "your-secret-id"
-
-# Access the secret
-api_key = access_secret_version(project_id, secret_id)
-print("API Key:", api_key)
-
-
-
-#############################
-
-import requests
-
-# Assuming you have already retrieved the API key
-api_key = "your-retrieved-api-key"
-
-# Example API endpoint
-api_url = "https://api.example.com/data"
-
-# Set up headers with the API key
-headers = {
-    "Authorization": f"Bearer {api_key}",
-    "Content-Type": "application/json"
+{
+  "views": [
+    {
+      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
+      "project_id": "hsbc-10594356-ihubukpre-prod",
+      "table_id": "EXTNL_ID"
+    },
+    {
+      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
+      "project_id": "hsbc-10594356-ihubukpre-prod",
+      "table_id": "FIN_PLAN_ARR"
+    },
+    {
+      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
+      "project_id": "hsbc-10594356-ihubukpre-prod",
+      "table_id": "FIN_PLAN_LEAD_DTL"
+    },
+    {
+      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
+      "project_id": "hsbc-10594356-ihubukpre-prod",
+      "table_id": "FIN_GOAL"
+    },
+    {
+      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
+      "project_id": "hsbc-10594356-ihubukpre-prod",
+      "table_id": "FIN_GOAL_PROD_ASET_ALLOC"
+    },
+    {
+      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
+      "project_id": "hsbc-10594356-ihubukpre-prod",
+      "table_id": "FIN_PLAN_WRAP_ACCT"
+    },
+    {
+      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
+      "project_id": "hsbc-10594356-ihubukpre-prod",
+      "table_id": "FIN_PLAN_RPT"
+    },
+    {
+      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
+      "project_id": "hsbc-10594356-ihubukpre-prod",
+      "table_id": "FIN_GOAL_RPT_REL"
+    },
+    {
+      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
+      "project_id": "hsbc-10594356-ihubukpre-prod",
+      "table_id": "FIN_PLAN_ORD_PLAC"
+    },
+    {
+      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
+      "project_id": "hsbc-10594356-ihubukpre-prod",
+      "table_id": "FIN_PLAN_ORD_PLAC_ADDL_ITEM"
+    },
+    {
+      "dataset_id": "DS_UKH_WPB_DNA_IHUB_DSW_SFP_HISTORY_SNAP_AUTH_VIEWS_UK_PFS_PROD",
+      "project_id": "hsbc-10594356-ihubukpre-prod",
+      "table_id": "FIN_PLAN_LEAD_DTL_ADDL_ITEM"
+    }
+  ]
 }
-
-# Make the API call
-response = requests.get(api_url, headers=headers)
-
-# Check the response
-if response.status_code == 200:
-    print("API call successful!")
-    print("Response data:", response.json())
-else:
-    print(f"Failed to call API. Status code: {response.status_code}")
-    print("Error message:", response.text)
-#######################################
-
-
