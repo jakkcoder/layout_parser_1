@@ -1,28 +1,33 @@
-SELECT
-  job_id,
-  user_email,
-  SUM(total_slots) AS total_slots,
-  SUM(total_bytes_processed) AS total_bytes,
-  SUM(cost_per_slot) AS total_cost_slots,
-  SUM(cost_per_byte) AS total_cost_bytes,
-  SUM(total_cost) AS total_combined_cost
-FROM (
-  SELECT
-    job_id,
-    user_email,
-    (total_slot_ms / 1000 / 60 / 60) AS total_slots,  -- Compute time in hours assuming one slot equals one hour
-    total_bytes_processed,
-    ROUND(((total_slot_ms / 1000 / 60 / 60) * slot_rate), 2) AS cost_per_slot,  -- Cost calculation per slot
-    ROUND((total_bytes_processed / 1024 / 1024 / 1024) * byte_rate, 2) AS cost_per_byte,  -- Cost calculation per GB
-    ROUND(((total_slot_ms / 1000 / 60 / 60) * slot_rate) + ((total_bytes_processed / 1024 / 1024 / 1024) * byte_rate), 2) AS total_cost  -- Combined total cost
-  FROM
-    region-asia-east2.INFORMATION_SCHEMA.JOBS_BY_PROJECT
-  WHERE
-    total_slot_ms IS NOT NULL AND
-    TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) != 0 AND
-    end_time > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
-) derived
-GROUP BY
-  user_email
-ORDER BY
-  total_combined_cost DESC;
+import requests
+from pprint import pprint
+import datetime
+import json
+
+key = "56c3de4e-0d41-4af5-9b64-778e17869126"
+
+def get_builtwith_data(lookup):
+    """
+    lookup: domain name
+    """
+    final_data = {}
+    url = f"https://api.builtwith.com/v21/api.json?KEY={key}&LOOKUP={lookup}"
+    response = requests.get(url)
+    print(response.status_code)
+    if response.status_code == 200:
+        data = json.loads(response.json())
+        file_name = "response_output_" + lookup + str(datetime.datetime.now()) + ".json"
+        with open(file_name, 'w') as file:
+            file.write(json.dumps(data))
+        
+        final_data["SpendHistory"] = data["Result"]["SpendHistory"]
+        final_data["Attributes"] = data["Meta"]["Attributes"]
+        final_data["FirstIndexed"] = data["Meta"]["FirstIndexed"]
+        final_data["LastIndexed"] = data["Meta"]["LastIndexed"]
+        final_data["Lookup"] = data["Meta"]["Lookup"]
+        final_data["SalesRevenue"] = data["Result"]["SalesRevenue"]
+        
+        file_name = "corrected_response_output_" + lookup + str(datetime.datetime.now()) + ".json"
+        with open(file_name, 'w') as file:
+            file.write(json.dumps(final_data))
+    
+    return json.dumps(final_data)
