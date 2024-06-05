@@ -1,3 +1,97 @@
+from google.cloud import bigquery
+import json
+
+# Set your project ID and dataset ID
+project_id = 'your_project_id'
+dataset_id = 'your_dataset_id'
+table_id = 'bw_data_test'
+json_file_path = '/path/to/your_file.json'
+
+# Initialize a BigQuery client
+client = bigquery.Client(project=project_id)
+
+# Define the table schema
+schema = [
+    bigquery.SchemaField("SpendHistory", "RECORD", mode="REPEATED", fields=[
+        bigquery.SchemaField("D", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("S", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("IsDB", "STRING", mode="NULLABLE"),
+        bigquery.SchemaField("Spend", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("Paths", "RECORD", mode="REPEATED", fields=[
+            bigquery.SchemaField("Technologies", "RECORD", mode="REPEATED", fields=[
+                bigquery.SchemaField("Categories", "STRING", mode="REPEATED"),
+                bigquery.SchemaField("Name", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("Description", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("Link", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("Tag", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("FirstDetected", "INTEGER", mode="NULLABLE"),
+                bigquery.SchemaField("LastDetected", "INTEGER", mode="NULLABLE"),
+                bigquery.SchemaField("IsPremium", "STRING", mode="NULLABLE")
+            ]),
+            bigquery.SchemaField("FirstIndexed", "INTEGER", mode="NULLABLE"),
+            bigquery.SchemaField("LastIndexed", "INTEGER", mode="NULLABLE"),
+            bigquery.SchemaField("Domain", "STRING", mode="NULLABLE"),
+            bigquery.SchemaField("Url", "FLOAT", mode="NULLABLE"),
+            bigquery.SchemaField("SubDomain", "FLOAT", mode="NULLABLE")
+        ])
+    ]),
+    bigquery.SchemaField("Meta", "RECORD", mode="NULLABLE", fields=[
+        bigquery.SchemaField("Majestic", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("Umbrella", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("Vertical", "STRING", mode="NULLABLE"),
+        bigquery.SchemaField("Social", "STRING", mode="NULLABLE"),
+        bigquery.SchemaField("CompanyName", "STRING", mode="NULLABLE"),
+        bigquery.SchemaField("Telephones", "STRING", mode="REPEATED"),
+        bigquery.SchemaField("Emails", "STRING", mode="REPEATED"),
+        bigquery.SchemaField("City", "STRING", mode="NULLABLE"),
+        bigquery.SchemaField("State", "STRING", mode="NULLABLE"),
+        bigquery.SchemaField("Postcode", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("Country", "STRING", mode="NULLABLE"),
+        bigquery.SchemaField("Names", "STRING", mode="NULLABLE"),
+        bigquery.SchemaField("ARank", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("QRank", "INTEGER", mode="NULLABLE")
+    ]),
+    bigquery.SchemaField("Attributes", "RECORD", mode="NULLABLE", fields=[
+        bigquery.SchemaField("Employees", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("MJRank", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("MJTLDRank", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("RefSN", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("RefIP", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("Followers", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("Sitemap", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("GTMTags", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("QubitTags", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("TealiumTags", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("AdobeTags", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("CDimensions", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("CGoals", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("CMetrics", "INTEGER", mode="NULLABLE"),
+        bigquery.SchemaField("ProductCount", "INTEGER", mode="NULLABLE")
+    ]),
+    bigquery.SchemaField("FirstIndexed", "INTEGER", mode="NULLABLE"),
+    bigquery.SchemaField("LastIndexed", "INTEGER", mode="NULLABLE"),
+    bigquery.SchemaField("Lookup", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("SalesRevenue", "INTEGER", mode="NULLABLE")
+]
+
+# Define the table reference
+table_ref = client.dataset(dataset_id).table(table_id)
+
+# Create the table
+table = bigquery.Table(table_ref, schema=schema)
+table = client.create_table(table)
+
+# Load the JSON data into the table
+with open(json_file_path, 'rb') as source_file:
+    job_config = bigquery.LoadJobConfig(
+        source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON
+    )
+    load_job = client.load_table_from_file(source_file, table_ref, job_config=job_config)
+
+# Wait for the load job to complete
+load_job.result()
+
+print(f"Loaded {load_job.output_rows} rows into {dataset_id}:{table_id}.")
 
 from google.cloud import bigquery
 
