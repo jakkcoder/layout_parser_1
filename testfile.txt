@@ -4,20 +4,36 @@ class Zoominfo:
         print("Zoominfo: Getting JWT token")
 
     @staticmethod
-    def fetch_data_from_bq():
-        print("Zoominfo: Fetching data from BQ")
+    def fetch_prospect_data_from_bq():
+        print("Zoominfo: Fetching prospect data from BQ")
 
     @staticmethod
-    def create_payload():
-        print("Zoominfo: Creating payload")
+    def create_prospect_payload():
+        print("Zoominfo: Creating payload for prospect data")
 
     @staticmethod
-    def fetch_data_from_api():
-        print("Zoominfo: Fetching data from API")
+    def fetch_prospect_data_from_api():
+        print("Zoominfo: Fetching prospect data from API")
 
     @staticmethod
-    def insert_data_to_bq():
-        print("Zoominfo: Inserting data to BQ")
+    def insert_prospect_data_to_bq():
+        print("Zoominfo: Inserting prospect data to BQ")
+
+    @staticmethod
+    def fetch_users_data_from_bq():
+        print("Zoominfo: Fetching users data from BQ")
+
+    @staticmethod
+    def create_users_payload():
+        print("Zoominfo: Creating payload for users data")
+
+    @staticmethod
+    def fetch_users_data_from_api():
+        print("Zoominfo: Fetching users data from API")
+
+    @staticmethod
+    def insert_users_data_to_bq():
+        print("Zoominfo: Inserting users data to BQ")
 
 class Buildwith:
     @staticmethod
@@ -25,20 +41,38 @@ class Buildwith:
         print("Buildwith: Getting JWT token")
 
     @staticmethod
-    def fetch_data_from_bq():
-        print("Buildwith: Fetching data from BQ")
+    def fetch_prospect_data_from_bq():
+        print("Buildwith: Fetching prospect data from BQ")
 
     @staticmethod
-    def create_payload():
-        print("Buildwith: Creating payload")
+    def create_prospect_payload():
+        print("Buildwith: Creating payload for prospect data")
 
     @staticmethod
-    def fetch_data_from_api():
-        print("Buildwith: Fetching data from API")
+    def fetch_prospect_data_from_api():
+        print("Buildwith: Fetching prospect data from API")
 
     @staticmethod
-    def insert_data_to_bq():
-        print("Buildwith: Inserting data to BQ")
+    def insert_prospect_data_to_bq():
+        print("Buildwith: Inserting prospect data to BQ")
+
+    @staticmethod
+    def fetch_users_data_from_bq():
+        print("Buildwith: Fetching users data from BQ")
+
+    @staticmethod
+    def create_users_payload():
+        print("Buildwith: Creating payload for users data")
+
+    @staticmethod
+    def fetch_users_data_from_api():
+        print("Buildwith: Fetching users data from API")
+
+    @staticmethod
+    def insert_users_data_to_bq():
+        print("Buildwith: Inserting users data to BQ")
+
+
 
 
 import json
@@ -74,40 +108,65 @@ api_config = json.loads(Variable.get("api_config"))
 start = DummyOperator(task_id='start', dag=dag)
 end = DummyOperator(task_id='end', dag=dag)
 
-# Function to create task group dynamically
-def create_task_group(api_name, api_class, dag):
-    with TaskGroup(api_name) as tg:
-        get_token_task = PythonOperator(
-            task_id=f'create_jwt_token_{api_name}',
-            python_callable=eval(f"{api_class}.get_jwt_token"),
-            dag=dag,
-        )
-
+# Function to create task group dynamically for ProspectData
+def create_prospect_task_group(api_name, api_class, dag):
+    with TaskGroup(f'{api_name}_ProspectData') as tg:
         query_bq_task = PythonOperator(
-            task_id=f'query_data_from_bq_{api_name}',
-            python_callable=eval(f"{api_class}.fetch_data_from_bq"),
+            task_id='query_data_from_bq',
+            python_callable=eval(f"{api_class}.fetch_prospect_data_from_bq"),
             dag=dag,
         )
 
         create_payload_task = PythonOperator(
-            task_id=f'create_payload_{api_name}',
-            python_callable=eval(f"{api_class}.create_payload"),
+            task_id='create_payload',
+            python_callable=eval(f"{api_class}.create_prospect_payload"),
             dag=dag,
         )
 
         fetch_api_data_task = PythonOperator(
-            task_id=f'fetch_data_from_api_{api_name}',
-            python_callable=eval(f"{api_class}.fetch_data_from_api"),
+            task_id='fetch_data_from_api',
+            python_callable=eval(f"{api_class}.fetch_prospect_data_from_api"),
             dag=dag,
         )
 
         insert_bq_task = PythonOperator(
-            task_id=f'insert_data_to_bq_{api_name}',
-            python_callable=eval(f"{api_class}.insert_data_to_bq"),
+            task_id='insert_data_to_bq',
+            python_callable=eval(f"{api_class}.insert_prospect_data_to_bq"),
             dag=dag,
         )
 
-        get_token_task >> query_bq_task >> create_payload_task >> fetch_api_data_task >> insert_bq_task
+        query_bq_task >> create_payload_task >> fetch_api_data_task >> insert_bq_task
+
+    return tg
+
+# Function to create task group dynamically for UsersData
+def create_users_task_group(api_name, api_class, dag):
+    with TaskGroup(f'{api_name}_UsersData') as tg:
+        query_bq_task = PythonOperator(
+            task_id='query_data_from_bq',
+            python_callable=eval(f"{api_class}.fetch_users_data_from_bq"),
+            dag=dag,
+        )
+
+        create_payload_task = PythonOperator(
+            task_id='create_payload',
+            python_callable=eval(f"{api_class}.create_users_payload"),
+            dag=dag,
+        )
+
+        fetch_api_data_task = PythonOperator(
+            task_id='fetch_data_from_api',
+            python_callable=eval(f"{api_class}.fetch_users_data_from_api"),
+            dag=dag,
+        )
+
+        insert_bq_task = PythonOperator(
+            task_id='insert_data_to_bq',
+            python_callable=eval(f"{api_class}.insert_users_data_to_bq"),
+            dag=dag,
+        )
+
+        query_bq_task >> create_payload_task >> fetch_api_data_task >> insert_bq_task
 
     return tg
 
@@ -119,6 +178,10 @@ api_classes = {
 
 for api, settings in api_config.items():
     if settings['enabled']:
-        task_group = create_task_group(api, api_classes[api], dag)
-        start >> task_group >> end
+        prospect_data_group = create_prospect_task_group(api, api_classes[api], dag)
+        users_data_group = create_users_task_group(api, api_classes[api], dag)
+        start >> prospect_data_group >> end
+        start >> users_data_group >> end
+
+
 
