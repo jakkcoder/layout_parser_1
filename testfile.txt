@@ -1,1 +1,131 @@
 
+import json
+from airflow import DAG
+from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.python_operator import PythonOperator
+from airflow.models import Variable
+from airflow.utils.task_group import TaskGroup
+from airflow.utils.dates import days_ago
+from datetime import timedelta
+
+default_args = {
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
+}
+
+dag = DAG(
+    'multi_api_pipeline',
+    default_args=default_args,
+    description='A pipeline that handles multiple APIs based on Airflow variables',
+    schedule_interval=timedelta(days=1),
+    start_date=days_ago(1),
+    tags=['example'],
+)
+
+def get_jwt_token(api_name):
+    print(f"Getting JWT token for {api_name}")
+
+def fetch_prospect_data_from_bq():
+    print("Fetching prospect data from BQ")
+
+def create_prospect_payload():
+    print("Creating payload for prospect data")
+
+def fetch_prospect_data_from_api():
+    print("Fetching prospect data from API")
+
+def insert_prospect_data_to_bq():
+    print("Inserting prospect data to BQ")
+
+def fetch_users_data_from_bq():
+    print("Fetching users data from BQ")
+
+def create_users_payload():
+    print("Creating payload for users data")
+
+def fetch_users_data_from_api():
+    print("Fetching users data from API")
+
+def insert_users_data_to_bq():
+    print("Inserting users data to BQ")
+
+# Load the API config from Airflow variables
+api_config = json.loads(Variable.get("api_config"))
+
+start = DummyOperator(task_id='start', dag=dag)
+end = DummyOperator(task_id='end', dag=dag)
+
+# Function to create task group for ProspectData
+def create_prospect_task_group(dag):
+    with TaskGroup('ProspectData') as tg:
+        query_bq_task = PythonOperator(
+            task_id='query_data_from_bq',
+            python_callable=fetch_prospect_data_from_bq,
+            dag=dag,
+        )
+
+        create_payload_task = PythonOperator(
+            task_id='create_prospect_payload',
+            python_callable=create_prospect_payload,
+            dag=dag,
+        )
+
+        fetch_api_data_task = PythonOperator(
+            task_id='fetch_data_from_api',
+            python_callable=fetch_prospect_data_from_api,
+            dag=dag,
+        )
+
+        insert_bq_task = PythonOperator(
+            task_id='insert_data_to_bq',
+            python_callable=insert_prospect_data_to_bq,
+            dag=dag,
+        )
+
+        query_bq_task >> create_payload_task >> fetch_api_data_task >> insert_bq_task
+
+    return tg
+
+# Function to create task group for UsersData
+def create_users_task_group(dag):
+    with TaskGroup('UsersData') as tg:
+        query_bq_task = PythonOperator(
+            task_id='query_data_from_bq',
+            python_callable=fetch_users_data_from_bq,
+            dag=dag,
+        )
+
+        create_payload_task = PythonOperator(
+            task_id='create_users_payload',
+            python_callable=create_users_payload,
+            dag=dag,
+        )
+
+        fetch_api_data_task = PythonOperator(
+            task_id='fetch_data_from_api',
+            python_callable=fetch_users_data_from_api,
+            dag=dag,
+        )
+
+        insert_bq_task = PythonOperator(
+            task_id='insert_data_to_bq',
+            python_callable=insert_users_data_to_bq,
+            dag=dag,
+        )
+
+        query_bq_task >> create_payload_task >> fetch_api_data_task >> insert_bq_task
+
+    return tg
+
+# Create task groups for ProspectData and UsersData based on the config
+if api_config['Zoominfo']['enabled']:
+    prospect_data = create_prospect_task_group(dag)
+    start >> prospect_data >> end
+
+if api_config['Buildwith']['enabled']:
+    users_data = create_users_task_group(dag)
+    start >> users_data >> end
