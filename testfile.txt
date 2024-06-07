@@ -1,11 +1,10 @@
 import json
+from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator
 from airflow.models import Variable
 from airflow.utils.task_group import TaskGroup
-from airflow.utils.dates import days_ago
-from datetime import timedelta
 
 class Zoominfo:
     @staticmethod
@@ -90,83 +89,75 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
-dag = DAG(
-    'multi_api_pipeline',
-    default_args=default_args,
-    description='A pipeline that handles multiple APIs based on Airflow variables',
-    schedule_interval=timedelta(days=1),
-    start_date=days_ago(1),
-    tags=['example'],
-)
-
-# Load the API config from Airflow variables
-api_config = json.loads(Variable.get("api_config"))
-
-start = DummyOperator(task_id='start', dag=dag)
-end = DummyOperator(task_id='end', dag=dag)
-
 api_classes = {
     'Zoominfo': Zoominfo,
     'Buildwith': Buildwith
 }
 
-for api, settings in api_config.items():
-    if settings['enabled']:
-        api_class = api_classes[api]
+with DAG(
+    'multi_api_pipeline',
+    default_args=default_args,
+    description='A pipeline that handles multiple APIs based on Airflow variables',
+    schedule_interval=timedelta(days=1),
+    start_date=datetime(2024, 5, 3),
+    catchup=False,
+    tags=['example'],
+) as dag:
 
-        with TaskGroup(f'{api}_ProspectData', dag=dag) as prospect_data_group:
-            query_bq_task = PythonOperator(
-                task_id='query_data_from_bq',
-                python_callable=api_class.fetch_prospect_data_from_bq,
-                dag=dag,
-            )
+    start = DummyOperator(task_id='start')
+    end = DummyOperator(task_id='end')
 
-            create_payload_task = PythonOperator(
-                task_id='create_payload',
-                python_callable=api_class.create_prospect_payload,
-                dag=dag,
-            )
+    api_config = json.loads(Variable.get("api_config"))
 
-            fetch_api_data_task = PythonOperator(
-                task_id='fetch_data_from_api',
-                python_callable=api_class.fetch_prospect_data_from_api,
-                dag=dag,
-            )
+    for api, settings in api_config.items():
+        if settings['enabled']:
+            api_class = api_classes[api]
 
-            insert_bq_task = PythonOperator(
-                task_id='insert_data_to_bq',
-                python_callable=api_class.insert_prospect_data_to_bq,
-                dag=dag,
-            )
+            with TaskGroup(f'{api}_ProspectData') as prospect_data_group:
+                query_bq_task = PythonOperator(
+                    task_id='query_data_from_bq',
+                    python_callable=api_class.fetch_prospect_data_from_bq,
+                )
 
-            query_bq_task >> create_payload_task >> fetch_api_data_task >> insert_bq_task
+                create_payload_task = PythonOperator(
+                    task_id='create_payload',
+                    python_callable=api_class.create_prospect_payload,
+                )
 
-        with TaskGroup(f'{api}_UsersData', dag=dag) as users_data_group:
-            query_bq_task = PythonOperator(
-                task_id='query_data_from_bq',
-                python_callable=api_class.fetch_users_data_from_bq,
-                dag=dag,
-            )
+                fetch_api_data_task = PythonOperator(
+                    task_id='fetch_data_from_api',
+                    python_callable=api_class.fetch_prospect_data_from_api,
+                )
 
-            create_payload_task = PythonOperator(
-                task_id='create_payload',
-                python_callable=api_class.create_users_payload,
-                dag=dag,
-            )
+                insert_bq_task = PythonOperator(
+                    task_id='insert_data_to_bq',
+                    python_callable=api_class.insert_prospect_data_to_bq,
+                )
 
-            fetch_api_data_task = PythonOperator(
-                task_id='fetch_data_from_api',
-                python_callable=api_class.fetch_users_data_from_api,
-                dag=dag,
-            )
+                query_bq_task >> create_payload_task >> fetch_api_data_task >> insert_bq_task
 
-            insert_bq_task = PythonOperator(
-                task_id='insert_data_to_bq',
-                python_callable=api_class.insert_users_data_to_bq,
-                dag=dag,
-            )
+            with TaskGroup(f'{api}_UsersData') as users_data_group:
+                query_bq_task = PythonOperator(
+                    task_id='query_data_from_bq',
+                    python_callable=api_class.fetch_users_data_from_bq,
+                )
 
-            query_bq_task >> create_payload_task >> fetch_api_data_task >> insert_bq_task
+                create_payload_task = PythonOperator(
+                    task_id='create_payload',
+                    python_callable=api_class.create_users_payload,
+                )
 
-        start >> prospect_data_group >> end
-        start >> users_data_group >> end
+                fetch_api_data_task = PythonOperator(
+                    task_id='fetch_data_from_api',
+                    python_callable=api_class.fetch_users_data_from_api,
+                )
+
+                insert_bq_task = PythonOperator(
+                    task_id='insert_data_to_bq',
+                    python_callable=api_class.insert_users_data_to_bq,
+                )
+
+                query_bq_task >> create_payload_task >> fetch_api_data_task >> insert_bq_task
+
+            start >> prospect_data_group >> end
+            start >> users_data_group >> end
