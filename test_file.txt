@@ -1,42 +1,52 @@
-import json
+from google.cloud import bigquery
 
-# Define a simple SchemaField class to mimic the example
-class SchemaField:
-    def __init__(self, name, field_type, mode='NULLABLE', fields=None):
-        self.name = name
-        self.field_type = field_type
-        self.mode = mode
-        self.fields = fields or []
+# Initialize a BigQuery client
+client = bigquery.Client()
 
-# List of SchemaField objects, including nested fields
-schema_fields = [
-    SchemaField("user_id", "INTEGER"),
-    SchemaField("user_name", "STRING"),
-    SchemaField("email", "STRING"),
-    SchemaField("signup_date", "TIMESTAMP"),
-    SchemaField("address", "RECORD", fields=[
-        SchemaField("street", "STRING"),
-        SchemaField("city", "STRING"),
-        SchemaField("state", "STRING"),
-        SchemaField("zip", "STRING")
-    ])
-]
+# Define your dataset and table names
+dataset_id = 'your_dataset_id'
+table_id = 'your_table_id'
 
-# Convert SchemaField objects to a list of dictionaries
-def schema_to_dict(fields):
+# Load the schema from the JSON file
+with open('nested_schema.json', 'r') as f:
+    schema = json.load(f)
+
+# Convert the JSON schema to BigQuery SchemaField objects
+def json_to_bq_schema(json_schema):
     return [
-        {
-            "name": field.name,
-            "type": field.field_type,
-            "mode": field.mode,
-            "fields": schema_to_dict(field.fields) if field.fields else None
-        } for field in fields
+        bigquery.SchemaField(
+            field['name'],
+            field['type'],
+            mode=field.get('mode', 'NULLABLE'),
+            fields=json_to_bq_schema(field['fields']) if field.get('fields') else []
+        ) for field in json_schema
     ]
 
-schema_json = schema_to_dict(schema_fields)
+bq_schema = json_to_bq_schema(schema)
 
-# Save the schema JSON to a file
-with open('nested_schema.json', 'w') as f:
-    json.dump(schema_json, f, indent=4)
+# Define the table reference
+table_ref = client.dataset(dataset_id).table(table_id)
 
-print(json.dumps(schema_json, indent=4))
+# Create a table with the schema
+table = bigquery.Table(table_ref, schema=bq_schema)
+table = client.create_table(table)  # API request
+
+print(f"Created table {table.project}.{table.dataset_id}.{table.table_id}")
+
+# Load data into the table (example with a JSON file)
+uri = 'gs://your-bucket/path/to/your-file.json'
+
+job_config = bigquery.LoadJobConfig(
+    schema=bq_schema,
+    source_format=bigquery.SourceFormat.NEWLINE_DELIMITED_JSON,
+)
+
+load_job = client.load_table_from_uri(
+    uri,
+    table_ref,
+    job_config=job_config,
+)  # Make an API request.
+
+load_job.result()  # Wait for the job to complete.
+
+print(f"Loaded {load_job.output_rows} rows into {dataset_id}:{table_id}.")
