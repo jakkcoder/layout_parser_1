@@ -1,1 +1,96 @@
+import unittest
+from unittest.mock import MagicMock, patch
+from datetime import datetime
+import pandas as pd
+import numpy as np
+from builtwith import builtwith  # Replace 'builtwith' with the actual module name
+
+class TestBuiltwith(unittest.TestCase):
+
+    @patch('builtwith.requests.get')
+    @patch('builtwith.load_data_from_dataframe')
+    @patch('builtwith.set_variables')
+    @patch('builtwith.get_variable')
+    @patch('builtwith.initialize_logging')
+    def test_fetch_prospect_data_from_api(self, mock_logger, mock_get_variable, mock_set_variables, mock_load_data_from_dataframe, mock_requests_get):
+        # Mock data and objects
+        mock_logger.return_value = MagicMock()
+        mock_get_variable.return_value = 'dummy_token'
+        mock_set_variables.return_value = None
+        mock_load_data_from_dataframe.return_value = 'dummy_job'
+        
+        mock_task_instance = MagicMock()
+        mock_task_instance.xcom_pull.side_effect = [
+            pd.DataFrame({'domain': ['example1.com', 'example2.com']}),
+            'dummy_token',
+            pd.DataFrame({'domain': ['example1.com', 'example2.com'], 'user_id': [1, 2]})
+        ]
+        
+        mock_requests_get.return_value.status_code = 200
+        mock_requests_get.return_value.json.return_value = {
+            "Results": [{"Result": {"Meta": {"Postcode": "12345"}, "Lookup": "example1.com"}}]
+        }
+
+        # Call the method to test
+        result = builtwith.fetch_prospect_data_from_api(ti=mock_task_instance)
+
+        # Assertions
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertEqual(result.shape[0], 1)  # Check if only one row is returned for simplicity
+
+    @patch('builtwith.requests.get')
+    @patch('builtwith.load_data_from_dataframe')
+    @patch('builtwith.set_variables')
+    @patch('builtwith.get_variable')
+    @patch('builtwith.initialize_logging')
+    def test_fetch_users_data_from_api(self, mock_logger, mock_get_variable, mock_set_variables, mock_load_data_from_dataframe, mock_requests_get):
+        # Mock data and objects
+        mock_logger.return_value = MagicMock()
+        mock_get_variable.return_value = 'dummy_token'
+        mock_set_variables.return_value = None
+        mock_load_data_from_dataframe.return_value = 'dummy_job'
+
+        mock_task_instance = MagicMock()
+        mock_task_instance.xcom_pull.side_effect = [
+            pd.DataFrame({'source_url': ['https://example1.com', 'https://example2.com']}),
+            'dummy_token',
+            pd.DataFrame({'source_url': ['https://example1.com', 'https://example2.com'], 'user_id': [1, 2]})
+        ]
+
+        mock_requests_get.return_value.status_code = 200
+        mock_requests_get.return_value.json.return_value = {
+            "Results": [{"Result": {"Meta": {"Postcode": "12345"}, "Lookup": "https://example1.com"}}]
+        }
+
+        # Call the method to test
+        result = builtwith.fetch_users_data_from_api(ti=mock_task_instance)
+
+        # Assertions
+        self.assertIsInstance(result, pd.DataFrame)
+        self.assertEqual(result.shape[0], 1)  # Check if only one row is returned for simplicity
+
+    def test_create_prospect_payload(self):
+        mock_task_instance = MagicMock()
+        mock_task_instance.xcom_pull.return_value = pd.DataFrame({'domain': ['example1.com', 'example2.com']})
+        
+        payload = builtwith.create_prospect_payload(ti=mock_task_instance)
+        
+        self.assertIsInstance(payload, list)
+        self.assertEqual(len(payload), 2)
+        self.assertIn('example1.com', payload)
+        self.assertIn('example2.com', payload)
+
+    def test_create_users_payload(self):
+        mock_task_instance = MagicMock()
+        mock_task_instance.xcom_pull.return_value = pd.DataFrame({'source_url': ['https://example1.com', 'https://example2.com']})
+        
+        payload = builtwith.create_users_payload(ti=mock_task_instance)
+        
+        self.assertIsInstance(payload, list)
+        self.assertEqual(len(payload), 2)
+        self.assertIn('https://example1.com', payload)
+        self.assertIn('https://example2.com', payload)
+
+if __name__ == '__main__':
+    unittest.main()
 
