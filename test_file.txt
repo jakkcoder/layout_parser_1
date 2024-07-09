@@ -1,1 +1,23 @@
 
+import pandas as pd
+
+def load_table_to_dataframe(project_id, table_id):
+    """
+    Load a table from Google BigQuery into a Pandas DataFrame.
+
+    Args:
+        project_id (str): The ID of your Google Cloud project.
+        table_id (str): The full table ID in the format `project.dataset.table`.
+
+    Returns:
+        pd.DataFrame: The loaded DataFrame.
+    """
+    query = f'SELECT * FROM `{table_id}`'
+    df = pd.read_gbq(query, project_id=project_id)
+    return df
+
+# Example usage
+project_id = 'your-project-id'
+table_id = 'your-project.your_dataset.your_table'
+df = load_table_to_dataframe(project_id, table_id)
+print(df.head())
