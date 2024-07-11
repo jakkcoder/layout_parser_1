@@ -1,23 +1,23 @@
+from google.cloud import bigquery
+import json
 
-import pandas as pd
+# Define your project ID, dataset ID, and table ID
+project_id = 'your_project_id'
+dataset_id = 'your_dataset_id'
+table_id = 'your_table_id'
+table_full_id = f"{project_id}.{dataset_id}.{table_id}"
 
-def load_table_to_dataframe(project_id, table_id):
-    """
-    Load a table from Google BigQuery into a Pandas DataFrame.
+# Initialize a BigQuery client
+client = bigquery.Client(project=project_id)
 
-    Args:
-        project_id (str): The ID of your Google Cloud project.
-        table_id (str): The full table ID in the format `project.dataset.table`.
+# Get the table schema
+table = client.get_table(table_full_id)  # Make an API request.
 
-    Returns:
-        pd.DataFrame: The loaded DataFrame.
-    """
-    query = f'SELECT * FROM `{table_id}`'
-    df = pd.read_gbq(query, project_id=project_id)
-    return df
+# Convert the schema to a JSON representation
+schema_json = [field.to_api_repr() for field in table.schema]
 
-# Example usage
-project_id = 'your-project-id'
-table_id = 'your-project.your_dataset.your_table'
-df = load_table_to_dataframe(project_id, table_id)
-print(df.head())
+# Save the schema to a JSON file
+with open('table_schema.json', 'w') as schema_file:
+    json.dump(schema_json, schema_file, indent=2)
+
+print(f"Schema for table {table_full_id} saved to table_schema.json")
