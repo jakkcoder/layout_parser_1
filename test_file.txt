@@ -1,23 +1,30 @@
 from google.cloud import bigquery
 import json
 
-# Define your project ID, dataset ID, and table ID
+# Define your project ID and dataset/table names
 project_id = 'your_project_id'
 dataset_id = 'your_dataset_id'
 table_id = 'your_table_id'
 table_full_id = f"{project_id}.{dataset_id}.{table_id}"
 
+# Load the schema from JSON file
+with open('path/to/your/nested_schema.json') as schema_file:
+    schema_json = json.load(schema_file)
+
+# Convert schema JSON to BigQuery SchemaField list
+schema = [bigquery.SchemaField.from_api_repr(field) for field in schema_json]
+
 # Initialize a BigQuery client
 client = bigquery.Client(project=project_id)
 
-# Get the table schema
-table = client.get_table(table_full_id)  # Make an API request.
+# Create a table if it doesn't exist
+table = bigquery.Table(table_full_id, schema=schema)
+table = client.create_table(table, exists_ok=True)  # Make an API request.
 
-# Convert the schema to a JSON representation
-schema_json = [field.to_api_repr() for field in table.schema]
+# Load DataFrame to BigQuery
+job = client.load_table_from_dataframe(df, table_full_id)
 
-# Save the schema to a JSON file
-with open('table_schema.json', 'w') as schema_file:
-    json.dump(schema_json, schema_file, indent=2)
+# Wait for the job to complete
+job.result()
 
-print(f"Schema for table {table_full_id} saved to table_schema.json")
+print(f"Loaded {job.output_rows} rows into {table_full_id}.")
