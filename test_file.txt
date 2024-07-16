@@ -4,50 +4,32 @@ from google.cloud import bigquery
 bq_schedule_table = 'PIPELINE_RUN_INFO'
 
 # Define column names
-bq_schedule_meta = [
-    'comment',
-    'created_at',
-    'description',
-    'dp_image_version',
-    'end_time',
-    'id',
-    'notification_recipients',
-    'pipeline_id',
-    'pipeline_zip',
-    'python_version',
-    'request_package',
-    'run_id',
-    'start_time',
-    'status',
-    'step_num',
-    'update_time',
-    'version'
-]
+bq_schedule_meta = ['COMMENT', 'CREATED_AT', 'DESCRIPTION', 'DP_IMAGE_VERSION', 'END_TIME', 'ID', 'NOTIFICATION_RECIPIENTS', 'PIPELINE_ID', 'PIPELINE_ZIP', 'PYTHON_VERSION', 'REQUEST_PACKAGE', 'RUN_ID', 'START_TIME', 'STATUS', 'STEP_NUM', 'UPDATE_TIME', 'VERSION']
 
 # Define schema
 bq_schedule_schema = [
-    bigquery.SchemaField("comment", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("created_at", "TIMESTAMP", mode="NULLABLE"),
-    bigquery.SchemaField("description", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("dp_image_version", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("end_time", "TIMESTAMP", mode="NULLABLE"),
-    bigquery.SchemaField("id", "INTEGER", mode="NULLABLE"),
-    bigquery.SchemaField("notification_recipients", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("pipeline_id", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("pipeline_zip", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("python_version", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("request_package", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("run_id", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("start_time", "TIMESTAMP", mode="NULLABLE"),
-    bigquery.SchemaField("status", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("step_num", "INTEGER", mode="NULLABLE"),
-    bigquery.SchemaField("update_time", "TIMESTAMP", mode="NULLABLE"),
-    bigquery.SchemaField("version", "STRING", mode="NULLABLE")
+    bigquery.SchemaField("COMMENT", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("CREATED_AT", "TIMESTAMP", mode="NULLABLE"),
+    bigquery.SchemaField("DESCRIPTION", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("DP_IMAGE_VERSION", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("END_TIME", "TIMESTAMP", mode="NULLABLE"),
+    bigquery.SchemaField("ID", "INTEGER", mode="NULLABLE"),
+    bigquery.SchemaField("NOTIFICATION_RECIPIENTS", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("PIPELINE_ID", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("PIPELINE_ZIP", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("PYTHON_VERSION", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("REQUEST_PACKAGE", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("RUN_ID", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("START_TIME", "TIMESTAMP", mode="NULLABLE"),
+    bigquery.SchemaField("STATUS", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("STEP_NUM", "INTEGER", mode="NULLABLE"),
+    bigquery.SchemaField("UPDATE_TIME", "TIMESTAMP", mode="NULLABLE"),
+    bigquery.SchemaField("VERSION", "STRING", mode="NULLABLE")
 ]
 
 # Now you can use this schema when creating a BigQuery table
 client = bigquery.Client()
-table_id = "your_project.your_dataset.Pipeline_Run_Info"
+table_id = "your_project.your_dataset.PIPELINE_RUN_INFO"
 table = bigquery.Table(table_id, schema=bq_schedule_schema)
 
 # Create the table in BigQuery
