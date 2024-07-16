@@ -1,39 +1,32 @@
+import pandas as pd
 from google.cloud import bigquery
+import os
 
-# Define table name
-bq_schedule_table = 'PIPELINE_BASE_INFO'
+# Set the environment variable for Google Cloud credentials
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "path/to/your/credentials.json"
 
-# Define column names
-bq_schedule_meta = ['ACTIVE_FLAG', 'BRANCH_NAME', 'CREATED_AT', 'CURRENT_EDITOR', 'DEFAULT_RECIPIENTS', 'EXECUTE_TYPE', 'GIT_REPO_URL', 'IS_LOCKED', 'IS_PAUSED', 'LAST_RUN_TIME', 'NOTIFICATION_RECIPIENTS', 'PIPELINE_ID', 'PIPELINE_NAME', 'PIPELINE_RUN_TIMES', 'SCHEDULE_INTERVAL', 'STAFF_EMAIL', 'STAFF_ID', 'TEAM_USECASE_NAME', 'UPDATE_TIME']
+# Load the CSV file into a DataFrame
+csv_file_path = 'path/to/your/file.csv'
+df = pd.read_csv(csv_file_path)
 
-# Define schema
-bq_schedule_schema = [
-    bigquery.SchemaField("ACTIVE_FLAG", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("BRANCH_NAME", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("CREATED_AT", "TIMESTAMP", mode="NULLABLE"),
-    bigquery.SchemaField("CURRENT_EDITOR", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("DEFAULT_RECIPIENTS", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("EXECUTE_TYPE", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("GIT_REPO_URL", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("IS_LOCKED", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("IS_PAUSED", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("LAST_RUN_TIME", "TIMESTAMP", mode="NULLABLE"),
-    bigquery.SchemaField("NOTIFICATION_RECIPIENTS", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("PIPELINE_ID", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("PIPELINE_NAME", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("PIPELINE_RUN_TIMES", "INTEGER", mode="NULLABLE"),
-    bigquery.SchemaField("SCHEDULE_INTERVAL", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("STAFF_EMAIL", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("STAFF_ID", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("TEAM_USECASE_NAME", "STRING", mode="NULLABLE"),
-    bigquery.SchemaField("UPDATE_TIME", "TIMESTAMP", mode="NULLABLE")
-]
-
-# Now you can use this schema when creating a BigQuery table
+# Initialize a BigQuery client
 client = bigquery.Client()
-table_id = "your_project.your_dataset.PIPELINE_BASE_INFO"
-table = bigquery.Table(table_id, schema=bq_schedule_schema)
 
-# Create the table in BigQuery
-table = client.create_table(table)
-print(f"Created table {table.project}.{table.dataset_id}.{table.table_id}")
+# Define the BigQuery details
+project_id = 'your-gcp-project-id'
+dataset_id = 'your_dataset'
+table_id = 'your_table'
+table_ref = f"{project_id}.{dataset_id}.{table_id}"
+
+# Define the job configuration for loading the data
+job_config = bigquery.LoadJobConfig(
+    write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,  # Options: WRITE_TRUNCATE, WRITE_APPEND, WRITE_EMPTY
+)
+
+# Load the DataFrame into BigQuery
+job = client.load_table_from_dataframe(df, table_ref, job_config=job_config)
+
+# Wait for the load job to complete
+job.result()
+
+print(f"Loaded {job.output_rows} rows into {table_ref}.")
