@@ -1,30 +1,55 @@
 from google.cloud import bigquery
-import json
 
-# Define your project ID and dataset/table names
-project_id = 'your_project_id'
-dataset_id = 'your_dataset_id'
-table_id = 'your_table_id'
-table_full_id = f"{project_id}.{dataset_id}.{table_id}"
+# Define table name
+bq_schedule_table = 'PIPELINE_RUN_INFO'
 
-# Load the schema from JSON file
-with open('path/to/your/nested_schema.json') as schema_file:
-    schema_json = json.load(schema_file)
+# Define column names
+bq_schedule_meta = [
+    'comment',
+    'created_at',
+    'description',
+    'dp_image_version',
+    'end_time',
+    'id',
+    'notification_recipients',
+    'pipeline_id',
+    'pipeline_zip',
+    'python_version',
+    'request_package',
+    'run_id',
+    'start_time',
+    'status',
+    'step_num',
+    'update_time',
+    'version'
+]
 
-# Convert schema JSON to BigQuery SchemaField list
-schema = [bigquery.SchemaField.from_api_repr(field) for field in schema_json]
+# Define schema
+bq_schedule_schema = [
+    bigquery.SchemaField("comment", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("created_at", "TIMESTAMP", mode="NULLABLE"),
+    bigquery.SchemaField("description", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("dp_image_version", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("end_time", "TIMESTAMP", mode="NULLABLE"),
+    bigquery.SchemaField("id", "INTEGER", mode="NULLABLE"),
+    bigquery.SchemaField("notification_recipients", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("pipeline_id", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("pipeline_zip", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("python_version", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("request_package", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("run_id", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("start_time", "TIMESTAMP", mode="NULLABLE"),
+    bigquery.SchemaField("status", "STRING", mode="NULLABLE"),
+    bigquery.SchemaField("step_num", "INTEGER", mode="NULLABLE"),
+    bigquery.SchemaField("update_time", "TIMESTAMP", mode="NULLABLE"),
+    bigquery.SchemaField("version", "STRING", mode="NULLABLE")
+]
 
-# Initialize a BigQuery client
-client = bigquery.Client(project=project_id)
+# Now you can use this schema when creating a BigQuery table
+client = bigquery.Client()
+table_id = "your_project.your_dataset.Pipeline_Run_Info"
+table = bigquery.Table(table_id, schema=bq_schedule_schema)
 
-# Create a table if it doesn't exist
-table = bigquery.Table(table_full_id, schema=schema)
-table = client.create_table(table, exists_ok=True)  # Make an API request.
-
-# Load DataFrame to BigQuery
-job = client.load_table_from_dataframe(df, table_full_id)
-
-# Wait for the job to complete
-job.result()
-
-print(f"Loaded {job.output_rows} rows into {table_full_id}.")
+# Create the table in BigQuery
+table = client.create_table(table)
+print(f"Created table {table.project}.{table.dataset_id}.{table.table_id}")
