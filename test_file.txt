@@ -1,2 +1,32 @@
 bq query --nouse_legacy_sql \
 'SELECT * FROM `your-dataset.your-table` LIMIT 10'
+from google.cloud import bigquery
+
+def get_table_schema_and_columns(project_id, dataset_id, table_id):
+    client = bigquery.Client(project=project_id)
+
+    table_ref = f"{project_id}.{dataset_id}.{table_id}"
+    table = client.get_table(table_ref)  # API request
+
+    # Get the schema
+    schema = table.schema
+
+    # Extract column names
+    column_names = [field.name for field in schema]
+
+    return schema, column_names
+
+# Replace with your project_id, dataset_id, and table_id
+project_id = "your-project-id"
+dataset_id = "your-dataset-id"
+table_id = "your-table-id"
+
+schema, column_names = get_table_schema_and_columns(project_id, dataset_id, table_id)
+
+print("Schema:")
+for field in schema:
+    print(f"Name: {field.name}, Type: {field.field_type}, Mode: {field.mode}")
+
+print("\nColumn Names:")
+print(column_names)
+
