@@ -5,8 +5,7 @@ WITH current_week AS (
         (TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60)) as Query_Duration,
         (total_slot_ms / TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) * .87 * (TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60))) AS cost,
         start_time,
-        end_time,
-        TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) AS duration_ms
+        end_time
     FROM
         `region-asia-east2.INFORMATION_SCHEMA.JOBS_BY_PROJECT` jobs
     WHERE
@@ -21,8 +20,7 @@ previous_week AS (
         (TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60)) as Query_Duration,
         (total_slot_ms / TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) * .87 * (TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60))) AS cost,
         start_time,
-        end_time,
-        TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) AS duration_ms
+        end_time
     FROM
         `region-asia-east2.INFORMATION_SCHEMA.JOBS_BY_PROJECT` jobs
     WHERE
@@ -38,8 +36,6 @@ weekly_data AS (
         current_week.Query_Duration,
         current_week.cost AS current_cost,
         COALESCE(previous_week.cost, 0) AS previous_cost,
-        current_week.duration_ms,
-        COALESCE(previous_week.duration_ms, 0) AS previous_duration_ms,
         (current_week.cost - COALESCE(previous_week.cost, 0)) AS cost_increment,
         (SUM(current_week.Total_slots) OVER()) / (1024 * 1024 * 1024 * 1024) AS WEEKLY_TIB_BYTES_BILLED,
         (SUM(current_week.Total_slots) OVER() - SUM(COALESCE(previous_week.Total_slots, 0)) OVER()) / (1024 * 1024 * 1024 * 1024) AS WEEKLY_TIB_BYTES_BILLED_delta
@@ -54,15 +50,11 @@ SELECT
     query,
     Total_slots,
     Query_Duration,
-    current_cost,
-    previous_cost,
+    current_cost AS cost,
     cost_increment,
-    duration_ms,
-    previous_duration_ms,
-    WEEKLY_TIB_BYTES_BILLED,
     WEEKLY_TIB_BYTES_BILLED_delta
 FROM
     weekly_data
 ORDER BY
-    cost_increment DESC
+    cost DESC
 LIMIT 2;
