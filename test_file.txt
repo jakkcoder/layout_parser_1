@@ -5,7 +5,8 @@ WITH current_week AS (
         ROUND((TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60)), 2) AS Query_Duration,
         ROUND((total_slot_ms / TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) * .87 * (TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60))), 2) AS Cost,
         start_time,
-        end_time
+        end_time,
+        ROUND(total_bytes_billed / (1024 * 1024 * 1024 * 1024), 2) AS TB_Billed
     FROM
         `region-asia-east2.INFORMATION_SCHEMA.JOBS_BY_PROJECT` jobs
     WHERE
@@ -20,7 +21,8 @@ previous_week AS (
         ROUND((TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60)), 2) AS Query_Duration,
         ROUND((total_slot_ms / TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) * .87 * (TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60))), 2) AS Cost,
         start_time,
-        end_time
+        end_time,
+        ROUND(total_bytes_billed / (1024 * 1024 * 1024 * 1024), 2) AS TB_Billed
     FROM
         `region-asia-east2.INFORMATION_SCHEMA.JOBS_BY_PROJECT` jobs
     WHERE
@@ -36,8 +38,9 @@ weekly_data AS (
         current_week.Query_Duration,
         current_week.Cost AS Current_Cost,
         COALESCE(previous_week.Cost, 0) AS Previous_Cost,
-        ROUND((current_week.Cost - COALESCE(previous_week.Cost, 0)), 2) AS Cost_Increment,
-        ROUND((SUM(current_week.Total_Slots) OVER() / (1000 * 60 * 60)), 2) AS Billed_Hours
+        ROUND((current_week.Cost - COALESCE(previous_week.Cost, 0)), 2) AS Increment_Cost_Weekly,
+        current_week.TB_Billed AS Billed_Hours,
+        ROUND((current_week.TB_Billed - COALESCE(previous_week.TB_Billed, 0)), 2) AS Increment_Datasize_Weekly
     FROM
         current_week
     LEFT JOIN
@@ -50,8 +53,8 @@ SELECT
     Total_Slots,
     Query_Duration,
     Current_Cost AS Cost,
-    Cost_Increment,
-    Billed_Hours
+    Increment_Cost_Weekly,
+    Increment_Datasize_Weekly
 FROM
     weekly_data
 ORDER BY
