@@ -37,8 +37,7 @@ weekly_data AS (
         current_week.cost AS current_cost,
         COALESCE(previous_week.cost, 0) AS previous_cost,
         (current_week.cost - COALESCE(previous_week.cost, 0)) AS cost_increment,
-        (SUM(current_week.Total_slots) OVER()) / (1024 * 1024 * 1024 * 1024) AS WEEKLY_TIB_BYTES_BILLED,
-        (SUM(current_week.Total_slots) OVER() - SUM(COALESCE(previous_week.Total_slots, 0)) OVER()) / (1024 * 1024 * 1024 * 1024) AS WEEKLY_TIB_BYTES_BILLED_delta
+        (SUM(current_week.Total_slots) OVER() / (1000 * 60 * 60)) AS billed_hours
     FROM
         current_week
     LEFT JOIN
@@ -52,7 +51,7 @@ SELECT
     Query_Duration,
     current_cost AS cost,
     cost_increment,
-    WEEKLY_TIB_BYTES_BILLED_delta
+    billed_hours
 FROM
     weekly_data
 ORDER BY
