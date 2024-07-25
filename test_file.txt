@@ -1,9 +1,9 @@
 WITH current_week AS (
     SELECT
-        query,
-        (total_slot_ms / TIMESTAMP_DIFF(end_time, start_time, MILLISECOND)) as Total_slots,
-        (TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60)) as Query_Duration,
-        (total_slot_ms / TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) * .87 * (TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60))) AS cost,
+        query AS Query,
+        ROUND((total_slot_ms / TIMESTAMP_DIFF(end_time, start_time, MILLISECOND)), 2) AS Total_Slots,
+        ROUND((TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60)), 2) AS Query_Duration,
+        ROUND((total_slot_ms / TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) * .87 * (TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60))), 2) AS Cost,
         start_time,
         end_time
     FROM
@@ -15,10 +15,10 @@ WITH current_week AS (
 ),
 previous_week AS (
     SELECT
-        query,
-        (total_slot_ms / TIMESTAMP_DIFF(end_time, start_time, MILLISECOND)) as Total_slots,
-        (TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60)) as Query_Duration,
-        (total_slot_ms / TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) * .87 * (TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60))) AS cost,
+        query AS Query,
+        ROUND((total_slot_ms / TIMESTAMP_DIFF(end_time, start_time, MILLISECOND)), 2) AS Total_Slots,
+        ROUND((TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60)), 2) AS Query_Duration,
+        ROUND((total_slot_ms / TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) * .87 * (TIMESTAMP_DIFF(end_time, start_time, MILLISECOND) / (1000 * 60 * 60))), 2) AS Cost,
         start_time,
         end_time
     FROM
@@ -31,29 +31,29 @@ previous_week AS (
 ),
 weekly_data AS (
     SELECT
-        current_week.query,
-        current_week.Total_slots,
+        current_week.Query,
+        current_week.Total_Slots,
         current_week.Query_Duration,
-        current_week.cost AS current_cost,
-        COALESCE(previous_week.cost, 0) AS previous_cost,
-        (current_week.cost - COALESCE(previous_week.cost, 0)) AS cost_increment,
-        (SUM(current_week.Total_slots) OVER() / (1000 * 60 * 60)) AS billed_hours
+        current_week.Cost AS Current_Cost,
+        COALESCE(previous_week.Cost, 0) AS Previous_Cost,
+        ROUND((current_week.Cost - COALESCE(previous_week.Cost, 0)), 2) AS Cost_Increment,
+        ROUND((SUM(current_week.Total_Slots) OVER() / (1000 * 60 * 60)), 2) AS Billed_Hours
     FROM
         current_week
     LEFT JOIN
         previous_week
     ON
-        current_week.query = previous_week.query
+        current_week.Query = previous_week.Query
 )
 SELECT
-    query,
-    Total_slots,
+    Query,
+    Total_Slots,
     Query_Duration,
-    current_cost AS cost,
-    cost_increment,
-    billed_hours
+    Current_Cost AS Cost,
+    Cost_Increment,
+    Billed_Hours
 FROM
     weekly_data
 ORDER BY
-    cost DESC
+    Cost DESC
 LIMIT 2;
