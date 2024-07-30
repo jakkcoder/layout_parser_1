@@ -1,0 +1,22 @@
+WITH cte_input AS (
+    SELECT TO_JSON(STRUCT(
+        "wf-gcp-us-ae-merch-prod.bi_merch_processing.tbl_um_store_class" AS src_table,  -- (required) specify GBQ table
+        "wf-gcp-us-ae-ctlq-dataeng-prod" AS billing_project,                             -- (required) specify billing project for resource
+        "72" AS wayfair_team_id,                                                        -- (required) wayfair team ID
+        "DUPLICATE_CHECK" AS test_name,                                                 -- (required) specify type of the test
+        "supplier_id" AS target_columns,                                                -- (optional) target column
+        "true" AS send_slack_notification,                                              -- (optional) send slack notification
+        "false" AS send_pd_notification,                                                -- (optional) trigger PD
+        "ERROR" AS alert_type,                                                          -- (optional) WARN/soft or ERROR/hard
+        0.5 AS threshold,                                                               -- (optional) threshold
+        0.1 AS min_threshold,                                                           -- (optional) minimum threshold
+        0.9 AS max_threshold,                                                           -- (optional) maximum threshold
+        "partition_column_example" AS partition_column,                                 -- (optional) partition column
+        "partition_value_example" AS partition_value,                                   -- (optional) partition value
+        "custom_query_example" AS custom_query,                                         -- (optional) custom query
+        "regex_pattern_example" AS regex_pattern,                                       -- (optional) regex pattern
+        "date_column_example" AS date_column                                            -- (optional) date column
+    )) AS pt
+)
+SELECT 'wf-gcp-us-ae-merch-prod.bi_merch_dq.dataqualityChecks'(pt)
+FROM cte_input;
