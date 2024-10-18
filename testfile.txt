@@ -1,6 +1,46 @@
-SELECT 
-  SUM(CASE WHEN APPLICATION_INSTANCE_ID LIKE '%gdt%' THEN COST ELSE 0 END) AS total_gdt_cost,
-  SUM(CASE WHEN APPLICATION_INSTANCE_ID NOT LIKE '%gdt%' OR APPLICATION_INSTANCE_ID IS NULL THEN COST ELSE 0 END) AS total_non_gdt_cost,
-  SUM(COST) AS total_cost
-FROM 
-  `hsbc-10505826-ihubhds-dev.GCE_BILLING_DATA_DEV.GDT_BILLING_view`;
+Here is the full table from the four images provided, transcribed into text:
+
+| User ID            | Employee Number | Email                    | Type | Code                |
+|--------------------|-----------------|--------------------------|------|---------------------|
+| HBEU\GB-SVCAT-161  | 45167565         | eason.b.j.li@hsbc.com     | AD   | EF37-0c9eED08        |
+| HBEU\GB-SVCAT-162  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 5E68-218843660       |
+| HBEU\GB-SVCAT-163  | 45167565         | eason.b.j.li@hsbc.com     | AD   | DFBB-f6c7f8958       |
+| HBEU\GB-SVCAT-164  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 4AFA-4b05C541C       |
+| HBEU\GB-SVCAT-165  | 45167565         | eason.b.j.li@hsbc.com     | AD   | FA7C-fb7200E30       |
+| HBEU\GB-SVCAT-166  | 45167565         | eason.b.j.li@hsbc.com     | AD   | B149-e16a33BC7       |
+| HBEU\GB-SVCAT-167  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 0AF0-86ddD5E31       |
+| HBEU\GB-SVCAT-168  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 77C7-12beBADD3       |
+| HBEU\GB-SVCAT-169  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 469D-8bb811892       |
+| HBEU\GB-SVCAT-170  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 6BD8-d35346CA8       |
+| HBEU\GB-SVCAT-171  | 45167565         | eason.b.j.li@hsbc.com     | AD   | EA41-b6bf92403       |
+| HBEU\GB-SVCAT-172  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 3BBF-f29c6B81A       |
+| HBEU\GB-SVCAT-173  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 2477-97705C037       |
+| HBEU\GB-SVCAT-174  | 45167565         | eason.b.j.li@hsbc.com     | AD   | ECD2-4e9273689       |
+| HBEU\GB-SVCAT-175  | 45167565         | eason.b.j.li@hsbc.com     | AD   | CDFB-1adc5778B       |
+| HBEU\GB-SVCAT-176  | 45167565         | eason.b.j.li@hsbc.com     | AD   | BF54-5d67750CD       |
+| HBEU\GB-SVCAT-177  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 3E29-e48516C43       |
+| HBEU\GB-SVCAT-178  | 45167565         | eason.b.j.li@hsbc.com     | AD   | BBE8-d8c036C11       |
+| HBEU\GB-SVCAT-179  | 45167565         | eason.b.j.li@hsbc.com     | AD   | B065-86c9FC721       |
+| HBEU\GB-SVCAT-180  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 3060-98d6082FE       |
+| HBEU\GB-SVCAT-181  | 45167565         | eason.b.j.li@hsbc.com     | AD   | DDA9-5c9790492       |
+| HBEU\GB-SVCAT-182  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 8CC1-7801308AE       |
+| HBEU\GB-SVCAT-183  | 45167565         | eason.b.j.li@hsbc.com     | AD   | C00F-8642B90A4       |
+| HBEU\GB-SVCAT-184  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 88D1-ed9d72098       |
+| HBEU\GB-SVCAT-185  | 45167565         | eason.b.j.li@hsbc.com     | AD   | DC23-ce0dAF99F       |
+| HBEU\GB-SVCAT-186  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 21A1-105312D03       |
+| HBEU\GB-SVCAT-187  | 45167565         | eason.b.j.li@hsbc.com     | AD   | ECA4-ca686FF22       |
+| HBEU\GB-SVCAT-188  | 45167565         | eason.b.j.li@hsbc.com     | AD   | DAF2-6711E2629       |
+| HBEU\GB-SVCAT-189  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 5DA4-b1234ADAC       |
+| HBEU\GB-SVCAT-190  | 45167565         | eason.b.j.li@hsbc.com     | AD   | DC1A-185d056E6       |
+| HBEU\GB-SVCAT-191  | 45167565         | eason.b.j.li@hsbc.com     | AD   | C340-e3fb2D0E7       |
+| HBEU\GB-SVCAT-192  | 45167565         | eason.b.j.li@hsbc.com     | AD   | DD62-92a1C588F       |
+| HBEU\GB-SVCAT-193  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 5DE5-3bd867FB5       |
+| HBEU\GB-SVCAT-194  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 9681-fa489BAC1       |
+| HBEU\GB-SVCAT-195  | 45167565         | eason.b.j.li@hsbc.com     | AD   | E268-473aAD7FD       |
+| HBEU\GB-SVCAT-196  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 7FEB-6f0f6DA17       |
+| HBEU\GB-SVCAT-197  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 2A0E-ab667C1C4       |
+| HBEU\GB-SVCAT-198  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 8152-daa663647       |
+| HBEU\GB-SVCAT-199  | 45167565         | eason.b.j.li@hsbc.com     | AD   | D87B-958eE3E4D       |
+| HBEU\GB-SVCAT-200  | 45167565         | eason.b.j.li@hsbc.com     | AD   | 6E70-806f15031       |
+
+This should now include the full set of rows from all images provided. Let me know if you'd like further details or changes!
