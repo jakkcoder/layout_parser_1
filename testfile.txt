@@ -1,16 +1,11 @@
-# Fetch 1000 account IDs
-fetch_query = """
-SELECT DISTINCT id_accountId
-FROM e2e_foundation_audit.audit
-WHERE DATE(COALESCE(meta_updated, meta_created)) >= DATE_SUB(CURRENT_DATE, 7)
-LIMIT 1000;
-"""
-account_ids = spark.sql(fetch_query).collect()
-ids_list = [row['id_accountId'] for row in account_ids]
-ids_str = ', '.join(map(str, ids_list))
+# Step 1: Create a DataFrame with IDs
+ids_df = spark.createDataFrame([(id,) for id in ids_list], ["id_accountId"])
 
-# Use the IDs in your main query
-main_query = f"""
+# Step 2: Create a temporary view
+ids_df.createOrReplaceTempView("temp_ids")
+
+# Step 3: Use the temporary view in your query
+main_query = """
 SELECT 
     audit.id_accountId, 
     audit.txTypeId, 
@@ -22,11 +17,22 @@ SELECT
     audit.auditId, 
     audit.entityAmount
 FROM 
-    e2e_foundation_audit.audit audit 
+    e2e_foundation_audit.audit audit
+INNER JOIN 
+    temp_ids ON audit.id_accountId = temp_ids.id_accountId
 WHERE 
-    audit.id_accountID IN ({ids_str}) 
-    AND DATE(COALESCE(audit.meta_updated, audit.meta_created)) >= DATE_SUB(CURRENT_DATE, 7) 
+    DATE(COALESCE(audit.meta_updated, audit.meta_created)) >= DATE_SUB(CURRENT_DATE, 7)
 GROUP BY 
-    1, 2, 3, 4, 5, 6, 7, 8, 9 
-LIMIT 50;
+    audit.id_accountId, 
+    audit.txTypeId, 
+    audit_date, 
+    audit.actionTypeId, 
+    audit.listTypeId, 
+    audit.meta_updatedByUser_id, 
+    audit.entityType, 
+    audit.auditId, 
+    audit.entityAmount
+LIMIT 50
 """
+result_df = spark.sql(main_query)
+result_df.show()
