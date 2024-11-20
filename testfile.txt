@@ -1,29 +1,32 @@
-import boto3
-import random
-import string
+# Fetch 1000 account IDs
+fetch_query = """
+SELECT DISTINCT id_accountId
+FROM e2e_foundation_audit.audit
+WHERE DATE(COALESCE(meta_updated, meta_created)) >= DATE_SUB(CURRENT_DATE, 7)
+LIMIT 1000;
+"""
+account_ids = spark.sql(fetch_query).collect()
+ids_list = [row['id_accountId'] for row in account_ids]
+ids_str = ', '.join(map(str, ids_list))
 
-# Function to generate random string data
-def generate_random_string(length=32):
-    characters = string.ascii_letters + string.digits
-    return ''.join(random.choice(characters) for _ in range(length))
-
-# AWS S3 configuration
-bucket_name = "your-bucket-name"  # Replace with your S3 bucket name
-object_key = "random_data.txt"  # The key (file name) you want to use in S3
-
-# Initialize S3 client
-s3_client = boto3.client('s3')
-
-# Generate random string data
-random_data = generate_random_string(128)  # 128-character random string
-
-# Upload the data to S3
-try:
-    s3_client.put_object(
-        Bucket=bucket_name,
-        Key=object_key,
-        Body=random_data
-    )
-    print(f"Random string data uploaded to {bucket_name}/{object_key}")
-except Exception as e:
-    print(f"Error uploading data: {e}")
+# Use the IDs in your main query
+main_query = f"""
+SELECT 
+    audit.id_accountId, 
+    audit.txTypeId, 
+    COALESCE(audit.meta_updated, audit.meta_created) AS audit_date, 
+    audit.actionTypeId, 
+    audit.listTypeId, 
+    audit.meta_updatedByUser_id, 
+    audit.entityType, 
+    audit.auditId, 
+    audit.entityAmount
+FROM 
+    e2e_foundation_audit.audit audit 
+WHERE 
+    audit.id_accountID IN ({ids_str}) 
+    AND DATE(COALESCE(audit.meta_updated, audit.meta_created)) >= DATE_SUB(CURRENT_DATE, 7) 
+GROUP BY 
+    1, 2, 3, 4, 5, 6, 7, 8, 9 
+LIMIT 50;
+"""
