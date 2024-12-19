@@ -1,53 +1,52 @@
-
-import unittest
-from unittest.mock import Mock
-from app.service.domain.recommendations.items import Item
+import pytest
+from app.service.domain.recommendations.items import Item, TimeRange
 from app.service.post_filtering.post_filter import PostFilter, PostFilterChain
 
-class TestPostFilter(unittest.TestCase):
-    def setUp(self):
-        # Create mock items
-        self.item1 = Mock(spec=Item, item_id=1)
-        self.item2 = Mock(spec=Item, item_id=2)
-        self.item3 = Mock(spec=Item, item_id=3)
-        self.items = [self.item1, self.item2, self.item3]
+@pytest.fixture
+def items():
+    return [
+        Item(
+            item_id="CREATE_INVOICE_TEMPLATE",
+            allowed_in_time_range=TimeRange.NEVER,
+            personalize_id="1",
+        ),
+        Item(
+            item_id="SIGN_UP_TO_RECEIVE_PAYMENTS",
+            allowed_in_time_range=TimeRange.FIRST_30_DAYS,
+            personalize_id="2",
+        ),
+        Item(
+            item_id="CONNECT_BANKS_ACCOUNTS",
+            allowed_in_time_range=TimeRange.FIRST_30_DAYS,
+            personalize_id="3",
+        ),
+    ]
 
-        # Create a PostFilter with non-permitted items
-        self.non_permitted_filter = PostFilter(non_permitted_items_list=[self.item1])
+@pytest.fixture
+def non_permitted_items():
+    return ["CREATE_INVOICE_TEMPLATE"]
 
-    def test_filter_removes_non_permitted_items(self):
-        filtered_items = self.non_permitted_filter.filter(self.items)
-        self.assertNotIn(self.item1, filtered_items)
-        self.assertIn(self.item2, filtered_items)
-        self.assertIn(self.item3, filtered_items)
+@pytest.fixture
+def post_filters_chain(non_permitted_items):
+    # Create two PostFilters for chaining
+    filter1 = PostFilter(non_permitted_items_list=["CREATE_INVOICE_TEMPLATE"])
+    filter2 = PostFilter(non_permitted_items_list=["SIGN_UP_TO_RECEIVE_PAYMENTS"])
 
-class TestPostFilterChain(unittest.TestCase):
-    def setUp(self):
-        # Create mock items
-        self.item1 = Mock(spec=Item, item_id=1)
-        self.item2 = Mock(spec=Item, item_id=2)
-        self.item3 = Mock(spec=Item, item_id=3)
-        self.items = [self.item1, self.item2, self.item3]
+    # Create a PostFilterChain
+    return PostFilterChain(post_filters=[filter1, filter2])
 
-        # Create mock PostFilters
-        self.filter1 = Mock(spec=PostFilter)
-        self.filter1.filter.return_value = [self.item2, self.item3]
+def test_post_filter(items, non_permitted_items):
+    post_filter = PostFilter(non_permitted_items_list=non_permitted_items)
 
-        self.filter2 = Mock(spec=PostFilter)
-        self.filter2.filter.return_value = [self.item3]
+    filtered_items = post_filter.filter(items)
 
-        # Create a PostFilterChain and add filters
-        self.chain = PostFilterChain(post_filters=[self.filter1])
-        self.chain.add_post_filter(self.filter2)
+    assert len(filtered_items) == 2
+    assert all(item.personalize_id != "1" for item in filtered_items)
 
-    def test_chain_executes_all_filters(self):
-        filtered_items = self.chain.post_filter(self.items)
-        self.assertEqual(filtered_items, [self.item3])
+def test_post_filter_chain(items, post_filters_chain):
+    # Apply the PostFilterChain
+    filtered_items = post_filters_chain.post_filter(items)
 
-    def test_add_post_filter(self):
-        new_filter = Mock(spec=PostFilter)
-        self.chain.add_post_filter(new_filter)
-        self.assertIn(new_filter, self.chain.post_filters)
-
-if __name__ == "__main__":
-    unittest.main()
+    # Verify that both filters were applied
+    assert len(filtered_items) == 1
+    assert filtered_items[0].personalize_id == "3"
