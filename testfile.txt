@@ -1,6 +1,7 @@
-Here’s the updated version for your performance review:
+Here’s how you can present these achievements in your performance review:
 
-- Completed **unit testing** for the recommendation and other services, achieving **good code coverage** and ensuring reliability and maintainability of the codebase.  
-- Provided detailed **reporting updates** to the team, including the status of tickets (completed, in-progress, and pending), ensuring transparency and efficient task tracking.  
+- Completed **lectures on Tableau dashboard creation** to enhance skills needed for developing dashboards for the team.  
+- Learned and implemented **unit testing using GitHub Copilot**, improving the efficiency and accuracy of the testing process.  
+- Acquired a solid understanding of **AWS Athena** and effectively utilized it to complete tasks assigned during the story.  
 
-Let me know if you need any further modifications!
+Let me know if you need further adjustments!
