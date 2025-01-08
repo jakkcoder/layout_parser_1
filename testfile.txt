@@ -1,8 +1,7 @@
-Here’s how you can present this in a clear and concise format for your performance review under **Customer Delight**:
+Here’s how you can present this for your performance review:
 
-- Developed a **Tableau dashboard** for golden dataset metrics, ensuring usability for the entire team and aligning with customer expectations.
-- Delivered a detailed demo to the team, showcasing the creation process and features of the dashboard.
-- Incorporated **time-based data graphs** as per customer requirements, enhancing the dashboard's utility and value.
-- Received client appreciation in front of the team for exceeding expectations and delivering exceptional results.
+- Successfully completed all assigned story points **on time** with proper task execution and attention to detail.  
+- Ensured quality by getting tasks reviewed by senior team members before merging into the main branch.  
+- Created comprehensive **documentation** for the Tableau dashboard creation and the BPP pipeline, providing valuable resources for team members and future reference.  
 
-Let me know if you need further adjustments!
+Let me know if you'd like any additional edits!
