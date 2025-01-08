@@ -1,52 +1,8 @@
-import pytest
-from app.service.domain.recommendations.items import Item, TimeRange
-from app.service.post_filtering.post_filter import PostFilter, PostFilterChain
 
-@pytest.fixture
-def items():
-    return [
-        Item(
-            item_id="CREATE_INVOICE_TEMPLATE",
-            allowed_in_time_range=TimeRange.NEVER,
-            personalize_id="1",
-        ),
-        Item(
-            item_id="SIGN_UP_TO_RECEIVE_PAYMENTS",
-            allowed_in_time_range=TimeRange.FIRST_30_DAYS,
-            personalize_id="2",
-        ),
-        Item(
-            item_id="CONNECT_BANKS_ACCOUNTS",
-            allowed_in_time_range=TimeRange.FIRST_30_DAYS,
-            personalize_id="3",
-        ),
-    ]
 
-@pytest.fixture
-def non_permitted_items():
-    return ["CREATE_INVOICE_TEMPLATE"]
+Here’s how you can write your achievements in points for your performance review:
 
-@pytest.fixture
-def post_filters_chain(non_permitted_items):
-    # Create two PostFilters for chaining
-    filter1 = PostFilter(non_permitted_items_list=["CREATE_INVOICE_TEMPLATE"])
-    filter2 = PostFilter(non_permitted_items_list=["SIGN_UP_TO_RECEIVE_PAYMENTS"])
+- Assisted the audit team in developing the **Audit BPP Pipeline** for summary logs, ensuring streamlined processing and reporting.
+- Collaborated with the recommendation team to create and improve **unit test cases**, enhancing code quality and functionality.
 
-    # Create a PostFilterChain
-    return PostFilterChain(post_filters=[filter1, filter2])
-
-def test_post_filter(items, non_permitted_items):
-    post_filter = PostFilter(non_permitted_items_list=non_permitted_items)
-
-    filtered_items = post_filter.filter(items)
-
-    assert len(filtered_items) == 2
-    assert all(item.personalize_id != "1" for item in filtered_items)
-
-def test_post_filter_chain(items, post_filters_chain):
-    # Apply the PostFilterChain
-    filtered_items = post_filters_chain.post_filter(items)
-
-    # Verify that both filters were applied
-    assert len(filtered_items) == 1
-    assert filtered_items[0].personalize_id == "3"
+Let me know if you’d like further refinement!
