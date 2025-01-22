@@ -1,48 +1,24 @@
-import unittest
-from unittest.mock import patch, MagicMock
-from authz_service import get_authz_non_permitted_items
-
-class TestAuthzService(unittest.TestCase):
-    @patch("authz_service.requests.post")
-    def test_response_200_valid_data(self, mock_post):
-        # Mocking a valid 200 response with data
-        mock_post.return_value.status_code = 200
-        mock_post.return_value.json.return_value = {
-            "responses": [
-                {
-                    "decision": "PERMIT",
-                    "obligations": [
-                        {
-                            "resourceId": "test_resource",
-                            "targetRealId": "12345",
-                            "actionId": "create"
-                        }
-                    ]
-                }
-            ]
+{
+  "responses": [
+    {
+      "decision": "DENY",
+      "obligations": [
+        {
+          "resourceId": "irn:intuit::transactions_banking:transfer",
+          "targetRealId": "9341452799971629",
+          "actionId": "delete",
+          "type": "scope",
+          "authtoken_applicable_attributes": "subject[userId],subject[realmId],resource[id],action[id]"
         }
-
-        result = get_authz_non_permitted_items()
-        self.assertIsInstance(result, list)  # Check if result is a list
-        self.assertTrue(len(result) > 0)     # Ensure the result is not empty
-
-    @patch("authz_service.requests.post")
-    def test_response_504_empty_data(self, mock_post):
-        # Mocking a 504 response with empty data
-        mock_post.return_value.status_code = 504
-        mock_post.return_value.json.return_value = {}
-
-        result = get_authz_non_permitted_items()
-        self.assertEqual(result, [])  # Ensure an empty list is returned
-
-    @patch("authz_service.requests.post")
-    def test_response_200_empty_json(self, mock_post):
-        # Mocking a 200 response with empty JSON data
-        mock_post.return_value.status_code = 200
-        mock_post.return_value.json.return_value = {}
-
-        result = get_authz_non_permitted_items()
-        self.assertEqual(result, [])  # Ensure an empty list is returned
-
-if __name__ == "__main__":
-    unittest.main()
+      ],
+      "advice": [
+        {
+          "resourceId": "irn:intuit::transactions_banking:transfer",
+          "targetRealmId": "9341452799971629",
+          "actionId": "delete",
+          "type": "informational"
+        }
+      ]
+    }
+  ]
+}
