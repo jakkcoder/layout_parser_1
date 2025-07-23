@@ -1,24 +1,15 @@
-{
-  "responses": [
-    {
-      "decision": "DENY",
-      "obligations": [
-        {
-          "resourceId": "irn:intuit::transactions_banking:transfer",
-          "targetRealId": "9341452799971629",
-          "actionId": "delete",
-          "type": "scope",
-          "authtoken_applicable_attributes": "subject[userId],subject[realmId],resource[id],action[id]"
-        }
-      ],
-      "advice": [
-        {
-          "resourceId": "irn:intuit::transactions_banking:transfer",
-          "targetRealmId": "9341452799971629",
-          "actionId": "delete",
-          "type": "informational"
-        }
-      ]
-    }
-  ]
-}
+	•	BuiltWith API Integration
+Tools: Apache Airflow, Python, BigQuery, Slack API
+→ Built modular DAG to ingest BuiltWith API data into BigQuery with alerting & config-driven design
+	•	Recommendation Engine
+Tools: AWS Personalize, Python, Pytest, AWS CLI
+→ Used AWS Personalize for recommendations, wrote unit tests, fixed bugs, optimized access via CLI caching
+	•	Splunk Monitoring
+Tools: Splunk, Airflow, Python
+→ Set up monitoring and alerting for Airflow pipelines using Splunk dashboards and logs
+	•	BPP Data Pipelines
+Tools: Apache Airflow, BigQuery, Python, SQL
+→ Developed and optimized ETL pipelines for analytics use cases
+	•	Dashboard Development
+Tools: Tableau, BigQuery, SQL
+→ Created interactive dashboards for business KPIs with filters and drill-downs
