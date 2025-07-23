@@ -1,3 +1,4 @@
+Projects at Intuit (with Tools Used)
 	•	BuiltWith API Integration
 Tools: Apache Airflow, Python, BigQuery, Slack API
 → Built modular DAG to ingest BuiltWith API data into BigQuery with alerting & config-driven design
@@ -11,5 +12,5 @@ Tools: Splunk, Airflow, Python
 Tools: Apache Airflow, BigQuery, Python, SQL
 → Developed and optimized ETL pipelines for analytics use cases
 	•	Dashboard Development
-Tools: Tableau, BigQuery, SQL
-→ Created interactive dashboards for business KPIs with filters and drill-downs
+Tools: Tableau, AWS Athena, SQL
+→ Created Tableau dashboards by connecting to AWS Athena for business KPI reporting
